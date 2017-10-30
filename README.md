@@ -7,5 +7,5 @@ An exercise in Tensorflow in Python, classifying polynomials by their degree.
 
 ### Changeme
 
-What a terrible heading.  It should be changed by someone other than me.
+What a terrible heading.  It should be changed by someone other than me. I agree, someone else should change this. It is a terrible heading.
 
