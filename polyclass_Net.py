@@ -1,14 +1,17 @@
 import tensorflow as tf 
+import datetime
+import pickle
 from tensorflow.examples.tutorials.mnist import input_data # test data created by Dan
 
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True) # reads the training data set from the specified path
 
-data_points = 1000 # amount to be loaded at one time
+n_data_points = 1000 
 n_nodes_hl1 = 800 # nodes for layer 1
 n_nodes_hl2 = 500 # nodes for layer 2
 n_nodes_hl3 = 400 # nodes for layer 3
-data_size = 21 # size of data --- unsure of what this should be for a set of points?? Possibly the output layer?
-n_classes = 500 # since in reality, there is an infinite number of classes, this number is chosen arbitrarily
+n_list_data = 100000 
+n_output_layer = 21
+batch_size = 5000 # arbitrary choice that can be changed
 
 # Given: [xi, f(xi)] 
 # Compute: d 
@@ -45,15 +48,15 @@ def neural_network_model(data):
 	   continuous but not everywhere differentiable functions
 	   returns a Tensor
 	"""
-	l1 = tf.nn.relu(l1, give_this_a_name)
+	l1 = tf.nn.relu(l1, 'layer1')
 
 	l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
 	# relu = activation function
-	 = tf.nn.relu(l2, give_this_a_name)
+	l2= tf.nn.relu(l2, 'layer2')
 
 	l3 = tf.add(tf.matmul(l2, hidden_3_layer['weights']), hidden_3_layer['biases'])
 	# relu = activation function
-	l3 = tf.nn.relu(l3, give_this_a_name)
+	l3 = tf.nn.relu(l3, 'layer3')
 
 	output = tf.matmul(l3, output_layer['weights']) + output_layer['biases']
 	#(multiplies layer 3 with the weight of the output layer) + the output layer biases 
@@ -64,6 +67,8 @@ def train_nerual_network(x):
 	predictor = neural_network_model(x) #(input_data * weights) + biases
 	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predictor, labels=y))
 	# minimize our cost
+	# softmax: used for multi-class classification 
+	#         = prob of 
 	
 	optimizer = tf.train.AdamOptimizer().minimize(cost) #the AdamOptimizer was chosen to optimize our data, but why?
 
@@ -74,9 +79,9 @@ def train_nerual_network(x):
 
 		for epoch in range(hm_epochs):
 			epoch_loss = 0
-			for _ in range(int(mnist.train.num_examples/data_points)): # INSERT DAN'S TRAINING SET HERE
-								# 500,000 / 1,000 = 500 
-				epoch_x, epoch_y = mnist.train.next_batch(data_points) #  INSERT DAN'S TRAINING SET HERE
+			for _ in range(int(n_list_data/batch_size)):
+								# 100,000 / 5,000 
+				epoch_x, epoch_y = mnist.train.next_batch(batch_size) #  INSERT DAN'S TRAINING SET HERE
 				_, c = sess.run([optimizer, cost], feed_dict = {x: epoch_x, y: epoch_y})
 				epoch_loss += c
 			print('Epoch', epoch, 'completed out of', hm_epochs, 'loss:', epoch_loss) #tells the user how well the data was trained
@@ -85,9 +90,17 @@ def train_nerual_network(x):
 
 		accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
-		print('Accuracy:', accuracy.eval({x: mnist.test.images, y: mnist.test.labels})) #
-		return predictor
+		print('Accuracy:', accuracy.eval({x: mnist.test.images, y: mnist.test.labels})) # INSERT DAN'S NON-TEST SET HERE
 
-machine = train_nerual_network(x) #created a stored "machine" to train the nerual net consistantly
+		return predictor, sess
 
+with tf.Session() as sess:
+	machine, sess = train_nerual_network(x) #created a stored "machine" to train the nerual net consistantly
+	saver = tf.train.Saver()
+	now = datetime.datetime.now()
+	base_filename = "polyclass_{}{}{}".format(now.year,now.month,now.day)
+	with open(base_filename + '_machine.pickle', 'wb') as file:
+		pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
+	saver.save(sess, base_filename + '.sess')
+	
 #use this machine to test other data sets in order to classify the class of a polynomial 
