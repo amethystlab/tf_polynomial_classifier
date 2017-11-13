@@ -13,25 +13,19 @@ def compute_values():
 	# should probably randomize all the values here...
 	# not sure if thats cool though, array might be
 	# expecting a certain size
-	xs = np.linspace(-500, 501, num=1000)
+	x = np.linspace(-500, 501, num=1000)
 
-	xs_length = len(xs)
+	x_length = len(x)
 
-	for index in range(xs_length):
+	f_x = np.zeros(x_length)
 
-		solution = 0
-		length = len(poly.coeffs)
+	num_coeffs = len(poly.coeffs)
+	for p in poly.coeffs:
+		coeff = p.coeff
+		exponent = p.exponent
+		f_x += coeff * pow(x, exponent)
 
-		for i in range(length):
-
-			x = poly.coeffs[i]
-			coeff = x.coeff
-			exponent = x.exponent
-			solution += coeff * pow(index, exponent)
-
-		xs[index] = solution
-
-	return xs
+	return (x, f_x)
 
 def create_data(num_data_sets):
 
@@ -50,6 +44,9 @@ if __name__ == '__main__':
 
 	if len(sys.argv) > 0:
 		num_data_sets = int(sys.argv[1])
+
+	# test = create_data(1)
+	# print(test)
 
 	print("Creating {} data sets...".format(num_data_sets))
 	data_set = create_data(num_data_sets)
