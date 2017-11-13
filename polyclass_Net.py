@@ -1,9 +1,6 @@
 import tensorflow as tf 
 import datetime
 import pickle
-from tensorflow.examples.tutorials.mnist import input_data # test data created by Dan
-
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True) # reads the training data set from the specified path
 
 n_data_points = 1000 
 n_nodes_hl1 = 800 # nodes for layer 1
@@ -24,30 +21,29 @@ def neural_network_model(data):
 
 	hidden_1_layer = {'weights': tf.Variable(tf.random_normal([data_size, n_nodes_hl1])),
 					'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
-"""creates a variable --> weights = finds normal of the data_size and number of nodes for layer 1
-						  biases = finds normal of the nodes for layer 1
-"""
-	hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
-					'biases': tf.Variable(tf.random_normal([n_nodes_hl2]))}
-"""creates a variable --> weights = finds normal of the number of nodes for layer 1 and number of nodes for layer 2
-						  biases = finds normal of the nodes for layer 2
-"""	
+	# creates a variable --> weights = finds normal of the data_size and number of nodes for layer 1
+	# biases = finds normal of the nodes for layer 1
+
+	hidden_2_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),'biases': tf.Variable(tf.random_normal([n_nodes_hl2]))}
+	# creates a variable --> weights = finds normal of the number of nodes for layer 1 and number of nodes for layer 2
+	# biases = finds normal of the nodes for layer 2
+
 	hidden_3_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
 					'biases': tf.Variable(tf.random_normal([n_nodes_hl3]))}
-"""creates a variable --> weights = finds normal of the number of nodes for layer 2 and number of nodes for layer 3
-						  biases = finds normal of the nodes for layer 3
-"""	
+	# creates a variable --> weights = finds normal of the number of nodes for layer 2 and number of nodes for layer 3
+	# biases = finds normal of the nodes for layer 3
+
 	output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
 					'biases': tf.Variable(tf.random_normal([n_classes]))}
-"""creates a variable --> weights = finds normal of the number of nodes for layer 3 and number of classes
-						  biases = finds normal of the number of classes
-"""	
+	# creates a variable --> weights = finds normal of the number of nodes for layer 3 and number of classes
+	# biases = finds normal of the number of classes
+
 	l1 = tf.add(tf.matmul(data, hidden_1_layer['weights']), hidden_1_layer['biases'])
-	"""relu = activation function
-	   The activation ops provide different types of nonlinearities for use in neural networks.
-	   continuous but not everywhere differentiable functions
-	   returns a Tensor
-	"""
+	# relu = activation function
+	# The activation ops provide different types of nonlinearities for use in neural networks.
+	# continuous but not everywhere differentiable functions
+	# returns a Tensor
+
 	l1 = tf.nn.relu(l1, 'layer1')
 
 	l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
@@ -71,6 +67,9 @@ def train_nerual_network(x):
 	#         = prob of 
 	
 	optimizer = tf.train.AdamOptimizer().minimize(cost) #the AdamOptimizer was chosen to optimize our data, but why?
+
+	data_set = pickle.load(open("data_set.p", "rb"))
+	print (data_set[:10])
 
 	hm_epochs = 10 #epoch = an repetition of data training; chosen arbitrarily
 
