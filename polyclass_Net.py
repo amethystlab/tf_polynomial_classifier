@@ -12,14 +12,16 @@ batch_size = 5000 # arbitrary choice that can be changed
 
 # Given: [xi, f(xi)] 
 # Compute: d 
-x = tf.placeholder('float', [None, data_size]) # (0, data_size) as an ordered pair
-y = tf.placeholder('float') 
+x = tf.placeholder('float', [None, n_data_points]) # (0, n_data_points) as an ordered pair
+print (x)
+y = tf.placeholder('float')
+print (y)
 
 def neural_network_model(data):
 
 	# (input_data * weights) + biases
 
-	hidden_1_layer = {'weights': tf.Variable(tf.random_normal([data_size, n_nodes_hl1])),
+	hidden_1_layer = {'weights': tf.Variable(tf.random_normal([n_data_points, n_nodes_hl1])),
 					'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
 	# creates a variable --> weights = finds normal of the data_size and number of nodes for layer 1
 	# biases = finds normal of the nodes for layer 1
@@ -33,8 +35,8 @@ def neural_network_model(data):
 	# creates a variable --> weights = finds normal of the number of nodes for layer 2 and number of nodes for layer 3
 	# biases = finds normal of the nodes for layer 3
 
-	output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
-					'biases': tf.Variable(tf.random_normal([n_classes]))}
+	output_layer = {'weights': tf.Variable(tf.random_normal([n_nodes_hl3, n_output_layer])),
+					'biases': tf.Variable(tf.random_normal([n_output_layer]))}
 	# creates a variable --> weights = finds normal of the number of nodes for layer 3 and number of classes
 	# biases = finds normal of the number of classes
 
@@ -69,18 +71,21 @@ def train_nerual_network(x):
 	optimizer = tf.train.AdamOptimizer().minimize(cost) #the AdamOptimizer was chosen to optimize our data, but why?
 
 	data_set = pickle.load(open("data_set.p", "rb"))
-	print (data_set[:10])
 
-	hm_epochs = 10 #epoch = an repetition of data training; chosen arbitrarily
+	hm_epochs = 1 #epoch = an repetition of data training; chosen arbitrarily
 
 	with tf.Session() as sess: # begin tf session... we will need to keep this open in order to keep our "machine"
 		sess.run(tf.global_variables_initializer())
 
 		for epoch in range(hm_epochs):
 			epoch_loss = 0
-			for _ in range(int(n_list_data/batch_size)):
+			for ii in range(int(n_list_data/batch_size)):
 								# 100,000 / 5,000 
-				epoch_x, epoch_y = mnist.train.next_batch(batch_size) #  INSERT DAN'S TRAINING SET HERE
+				a = ii * int(n_list_data/batch_size)
+				b = a + int(n_list_data/batch_size)
+				blah = data_set[a:b] #  INSERT DAN'S TRAINING SET HERE
+				epoch_x = [g[0] for g in blah]
+				epoch_y = [g[1] for g in blah]
 				_, c = sess.run([optimizer, cost], feed_dict = {x: epoch_x, y: epoch_y})
 				epoch_loss += c
 			print('Epoch', epoch, 'completed out of', hm_epochs, 'loss:', epoch_loss) #tells the user how well the data was trained
@@ -89,7 +94,7 @@ def train_nerual_network(x):
 
 		accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
-		print('Accuracy:', accuracy.eval({x: mnist.test.images, y: mnist.test.labels})) # INSERT DAN'S NON-TEST SET HERE
+		# print('Accuracy:', accuracy.eval({x: mnist.test.images, y: mnist.test.labels})) # INSERT DAN'S NON-TEST SET HERE
 
 		return predictor, sess
 
