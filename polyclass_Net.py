@@ -1,8 +1,9 @@
 import tensorflow as tf 
 import datetime
 import pickle
+import numpy as np
 
-n_data_points = 1000 
+n_data_points = 1000 * 2
 n_nodes_hl1 = 800 # nodes for layer 1
 n_nodes_hl2 = 500 # nodes for layer 2
 n_nodes_hl3 = 400 # nodes for layer 3
@@ -12,10 +13,15 @@ batch_size = 5000 # arbitrary choice that can be changed
 
 # Given: [xi, f(xi)] 
 # Compute: d 
+# x = tf.placeholder('float', [n_data_points, None]) # (0, n_data_points) as an ordered pair
 x = tf.placeholder('float', [None, n_data_points]) # (0, n_data_points) as an ordered pair
-print (x)
-y = tf.placeholder('float')
-print (y)
+
+print(x)
+# y = tf.placeholder('float', [n_data_points, n_output_layer])
+y = tf.placeholder('float', [None, n_output_layer])
+
+# tf.shape(y)
+print(y)
 
 def neural_network_model(data):
 
@@ -47,7 +53,7 @@ def neural_network_model(data):
 	# returns a Tensor
 
 	l1 = tf.nn.relu(l1, 'layer1')
-
+	l1 = tf.Print(l1, [l1], "layer1")
 	l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
 	# relu = activation function
 	l2= tf.nn.relu(l2, 'layer2')
@@ -61,50 +67,75 @@ def neural_network_model(data):
 	
 	return output
 
+
+def make_position_v(q):
+	z = np.zeros(n_output_layer)
+	z[q] = 1
+	return z
+
 def train_nerual_network(x):
-	predictor = neural_network_model(x) #(input_data * weights) + biases
+	predictor = neural_network_model(x) 
+	print (type(predictor))
+	print (predictor)
+	print (y)
+	#(input_data * weights) + biases
 	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predictor, labels=y))
 	# minimize our cost
 	# softmax: used for multi-class classification 
-	#         = prob of 
-	
-	optimizer = tf.train.AdamOptimizer().minimize(cost) #the AdamOptimizer was chosen to optimize our data, but why?
+	# = prob of
+
+	optimizer = tf.train.AdamOptimizer().minimize(cost)
+	# the AdamOptimizer was chosen to optimize our data, but why?
 
 	data_set = pickle.load(open("data_set.p", "rb"))
 
-	hm_epochs = 1 #epoch = an repetition of data training; chosen arbitrarily
+	hm_epochs = 1 
+	#epoch = a repetition of data training; chosen arbitrarily
 
-	with tf.Session() as sess: # begin tf session... we will need to keep this open in order to keep our "machine"
+	with tf.Session() as sess: 
+		# begin tf session... we will need to keep this open in order to keep our "machine"
 		sess.run(tf.global_variables_initializer())
 
 		for epoch in range(hm_epochs):
 			epoch_loss = 0
 			for ii in range(int(n_list_data/batch_size)):
 								# 100,000 / 5,000 
-				a = ii * int(n_list_data/batch_size)
-				b = a + int(n_list_data/batch_size)
-				blah = data_set[a:b] #  INSERT DAN'S TRAINING SET HERE
-				epoch_x = [g[0] for g in blah]
-				epoch_y = [g[1] for g in blah]
+				a = ii * batch_size
+				b = a + batch_size
+				blah = data_set[a:b] 
+				#  INSERT DAN'S TRAINING SET HERE
+				epoch_x = np.asarray([np.hstack((g[0],g[1])).transpose() for g in blah])
+
+				epoch_y = np.asarray([make_position_v(g[2]).transpose() for g in blah])
+				print(epoch_x[0,1000])
+
 				_, c = sess.run([optimizer, cost], feed_dict = {x: epoch_x, y: epoch_y})
 				epoch_loss += c
-			print('Epoch', epoch, 'completed out of', hm_epochs, 'loss:', epoch_loss) #tells the user how well the data was trained
+				print(c)
+			print('Epoch', epoch, 'completed out of', hm_epochs, 'loss:', epoch_loss) 
+			#tells the user how well the data was trained
 
 		correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
 
 		accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
-		# print('Accuracy:', accuracy.eval({x: mnist.test.images, y: mnist.test.labels})) # INSERT DAN'S NON-TEST SET HERE
+		test_d = pickle.load(open("test.p", "rb"))
+		test_x = np.asarray([np.hstack((g[0],g[1])).transpose() for g in test_d])
+		test_y = np.asarray([make_position_v(g[2]).transpose() for g in test_d])
+
+		print('Accuracy:', accuracy.eval({x: test_x, y: test_y})) 
+		# INSERT DAN'S NON-TEST SET HERE
 
 		return predictor, sess
 
 with tf.Session() as sess:
-	machine, sess = train_nerual_network(x) #created a stored "machine" to train the nerual net consistantly
+	machine, sess = train_nerual_network(x) 
+	#created a stored "machine" to train the nerual net consistantly
 	saver = tf.train.Saver()
 	now = datetime.datetime.now()
 	base_filename = "polyclass_{}{}{}".format(now.year,now.month,now.day)
 	with open(base_filename + '_machine.pickle', 'wb') as file:
 		pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
-	saver.save(sess, base_filename + '.sess')
+		saver.save(sess, base_filename + '.sess')
 	
-#use this machine to test other data sets in order to classify the class of a polynomial 
+		#use this machine to test other data sets in order to classify the class of a polynomial 

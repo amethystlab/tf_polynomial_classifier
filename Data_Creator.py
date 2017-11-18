@@ -13,7 +13,7 @@ def compute_values():
 	# should probably randomize all the values here...
 	# not sure if thats cool though, array might be
 	# expecting a certain size
-	x = np.linspace(-500, 501, num=1000)
+	x = np.linspace(-1, 1, num=1000)
 
 	x_length = len(x)
 
@@ -25,7 +25,7 @@ def compute_values():
 		exponent = p.exponent
 		f_x += coeff * pow(x, exponent)
 
-	return (x, f_x)
+	return (x, f_x, poly.degree)
 
 def create_data(num_data_sets):
 
