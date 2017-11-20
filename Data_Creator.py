@@ -15,17 +15,9 @@ def compute_values():
 	# expecting a certain size
 	x = np.linspace(-1, 1, num=1000)
 
-	x_length = len(x)
+	return (x, poly.evaluate(x), poly.degree)
 
-	f_x = np.zeros(x_length)
-
-	num_coeffs = len(poly.coeffs)
-	for p in poly.coeffs:
-		coeff = p.coeff
-		exponent = p.exponent
-		f_x += coeff * pow(x, exponent)
-
-	return (x, f_x, poly.degree)
+	# plot the poly.evaluate(x) and compare to a graphing calculator
 
 def create_data(num_data_sets):
 
@@ -52,4 +44,4 @@ if __name__ == '__main__':
 	data_set = create_data(num_data_sets)
 
 	print("Pickling data sets...")
-	pickle.dump(data_set, open("data_set.p", "wb"))
+	pickle.dump(data_set, open("test.p", "wb"))

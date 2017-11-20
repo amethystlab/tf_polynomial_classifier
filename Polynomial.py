@@ -30,13 +30,26 @@ class Polynomial:
 		for i in range(num_coeffs):			
 			# fill list with random coeffs from -100 to 100
 			# (another arbitrary coice)
-			coeff = np.random.randint(-100, 101)
+			# coeff = np.random.randint(-100, 101)
+			coeff = np.random.uniform(low=-100, high=100, size=1)
+
 			terms[i] = Term(coeff, degree) # need proper syntax
 
 		# make sure the polynomial is the degree it says it is
 		terms[0].exponent = degree
 
 		return terms
+
+	def evaluate(self, x):
+		f_x = np.zeros(len(x))
+		num_coeffs = len(self.coeffs)
+
+		for p in self.coeffs:
+			coeff = p.coeff
+			exponent = p.exponent
+			f_x += coeff * pow(x, exponent)
+
+		return f_x
 
 
 if __name__ == '__main__':
