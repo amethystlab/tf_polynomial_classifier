@@ -1,6 +1,7 @@
 # Author added files
 *.p
 *.pickle
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

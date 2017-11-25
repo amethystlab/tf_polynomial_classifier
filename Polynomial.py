@@ -1,5 +1,6 @@
 
 import numpy as np 
+import matplotlib.pyplot as plt
 from Term import Term
 
 class Polynomial:
@@ -51,10 +52,28 @@ class Polynomial:
 
 		return f_x
 
+	def graph(self):
+		x = np.linspace(-1, 1, num=1000)	# can I make this a default value somehow?
+		f_x = self.evaluate(x)
+		count = 0
+
+		for index in x:
+			y_value = f_x[count]
+			count = count + 1
+			plt.plot(index, y_value)
+
+		plt.xlabel('x-value')
+		plt.ylabel('f(x)-value')
+		plt.title('Polynomial')
+		plt.grid(True)
+		plt.savefig("test.png")
+		plt.show()
+
 
 if __name__ == '__main__':
 	poly = Polynomial()
 	print(poly)
+	poly.graph()
 
 	# to run in interactive shell type
 	# exec(open("./Polynomial.py").read())
