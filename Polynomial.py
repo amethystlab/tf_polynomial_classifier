@@ -1,5 +1,5 @@
 
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
 from Term import Term
 
@@ -14,7 +14,7 @@ class Polynomial:
 		# random number 1 - 20 (another arbitrary choice)
 		self.num_coeffs = self.degree
 		self.coeffs = self.generate_coeffs(self.num_coeffs, self.degree)
-		
+
 
 	# WHAT IS TO BE PRINTED TO SCREEN
 	def __str__(self):
@@ -24,15 +24,21 @@ class Polynomial:
 		string += "Coeffs: {}\n".format(self.coeffs)
 		return string
 
+	def print_to_matlab(self):
+		pretty = ''
+		for c in self.coeffs:
+			pretty += '{}*x.^{} + '.format(c.coeff, c.exponent)
+		return pretty[:-3]
+
 	# GENERATE COEFFECIENTS FOR CONSTRUCTOR
 	def generate_coeffs(self, num_coeffs, degree):
 		terms = np.ndarray((num_coeffs), dtype=np.object)
 
-		for i in range(num_coeffs):			
+		for i in range(num_coeffs):
 			# fill list with random coeffs from -100 to 100
 			# (another arbitrary coice)
 			# coeff = np.random.randint(-100, 101)
-			coeff = np.random.uniform(low=-100, high=100, size=1)
+			coeff = np.random.uniform(low=-100, high=100)
 
 			terms[i] = Term(coeff, degree) # need proper syntax
 
@@ -52,21 +58,14 @@ class Polynomial:
 
 		return f_x
 
-	def graph(self):
-		x = np.linspace(-1, 1, num=1000)	# can I make this a default value somehow?
+	def graph(self, x = np.linspace(-1, 1, num=100) ):
 		f_x = self.evaluate(x)
-		count = 0
 
-		for index in x:
-			y_value = f_x[count]
-			count = count + 1
-			plt.plot(index, y_value)
-
+		plt.plot(x,f_x)
 		plt.xlabel('x-value')
 		plt.ylabel('f(x)-value')
 		plt.title('Polynomial')
 		plt.grid(True)
-		plt.savefig("test.png")
 		plt.show()
 
 
