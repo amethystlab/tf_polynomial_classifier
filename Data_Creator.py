@@ -7,8 +7,8 @@ import numpy as np
 import pickle
 import sys
 
-def compute_values():
-	poly = Polynomial()
+def compute_values(max_degree):
+	poly = Polynomial(max_degree)
 
 	# should probably randomize all the values here...
 	# not sure if thats cool though, array might be
@@ -19,12 +19,12 @@ def compute_values():
 
 	# plot the poly.evaluate(x) and compare to a graphing calculator
 
-def create_data(num_data_sets):
+def create_data(num_data_sets, max_degree):
 
 	array_of_data_sets = np.ndarray((num_data_sets), dtype=np.object)
-	
+
 	for i in range(num_data_sets):
-		array_of_data_sets[i] = compute_values()
+		array_of_data_sets[i] = compute_values(max_degree)
 
 	return array_of_data_sets
 
@@ -32,16 +32,25 @@ def create_data(num_data_sets):
 if __name__ == '__main__':
 
 	# default value
-	num_data_sets = 1000
+	num_data_sets = 100000
+	num_test_sets = 1000
 
-	if len(sys.argv) > 0:
+	max_degree = 3
+
+	if len(sys.argv) > 1:
 		num_data_sets = int(sys.argv[1])
 
 	# test = create_data(1)
 	# print(test)
 
-	print("Creating {} data sets...".format(num_data_sets))
-	data_set = create_data(num_data_sets)
+	print("Creating {} training data sets...".format(num_data_sets))
 
-	print("Pickling data sets...")
-	pickle.dump(data_set, open("test.p", "wb"))
+	train_data_set = create_data(num_data_sets, max_degree)
+	pickle.dump(train_data_set, open("train.p", "wb"))
+
+	test_data_set = create_data(num_test_sets, max_degree)
+	pickle.dump(test_data_set, open("test.p", "wb"))
+
+	meta_information = {'num_test': num_test_sets, 'num_train': num_data_sets, 'max_degree': max_degree}
+
+	pickle.dump(meta_information, open('meta.p','wb'))
