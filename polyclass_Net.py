@@ -8,6 +8,9 @@ import numpy as np
 
 meta_information = pickle.load(open("meta.p", "rb"))
 
+# dan, consider programmatically constructing the layers using something like this:
+# layer_sizes = [[800],[500,500],[400],[100]] # nodes for layer 3
+
 n_data_points = 1000 * 2
 n_nodes_hl1 = 800 # nodes for layer 1
 n_nodes_hl2 = 500 # nodes for layer 2
