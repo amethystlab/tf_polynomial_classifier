@@ -77,7 +77,7 @@ def make_position_v(q):
 	z[q] = 1
 	return z
 
-def train_nerual_network(x):
+def train_neural_network(x):
 	predictor = neural_network_model(x)
 	# print (type(predictor))
 	# print (predictor)
@@ -129,7 +129,7 @@ def train_nerual_network(x):
 		return predictor, sess
 
 with tf.Session() as sess:
-	machine, sess = train_nerual_network(x)
+	machine, sess = train_neural_network(x)
 	#created a stored "machine" to train the nerual net consistantly
 	saver = tf.train.Saver()
 	now = datetime.datetime.now()
