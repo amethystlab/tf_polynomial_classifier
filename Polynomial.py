@@ -6,9 +6,9 @@ from Term import Term
 class Polynomial:
 
 	# OBJECT CONSTRUCTOR
-	def __init__(self):
+	def __init__(self, maxdegree = 21):
 		# degree of polynomial, any random number 1 - 20 (arbitrary choice)
-		self.degree = np.random.randint(1, 21)
+		self.degree = np.random.randint(1, maxdegree)
 
 		# number of coefficients in polynomial,
 		# random number 1 - 20 (another arbitrary choice)
