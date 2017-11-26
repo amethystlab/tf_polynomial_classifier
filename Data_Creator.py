@@ -1,6 +1,3 @@
-# To run from an interactive shell type vvv
-# 				exec(open("./Data_Creator.py").read())
-
 from Polynomial import Polynomial
 
 import numpy as np
@@ -8,16 +5,11 @@ import pickle
 import sys
 
 def compute_values(max_degree):
-	poly = Polynomial(max_degree)
 
-	# should probably randomize all the values here...
-	# not sure if thats cool though, array might be
-	# expecting a certain size
+	poly = Polynomial(max_degree)
 	x = np.linspace(-1, 1, num=1000)
 
 	return (x, poly.evaluate(x), poly.degree)
-
-	# plot the poly.evaluate(x) and compare to a graphing calculator
 
 def create_data(num_data_sets, max_degree):
 
@@ -31,7 +23,6 @@ def create_data(num_data_sets, max_degree):
 
 if __name__ == '__main__':
 
-	# default value
 	num_data_sets = 100000
 	num_test_sets = 1000
 
@@ -40,14 +31,11 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		num_data_sets = int(sys.argv[1])
 
-	# test = create_data(1)
-	# print(test)
-
 	print("Creating {} training data sets...".format(num_data_sets))
-
 	train_data_set = create_data(num_data_sets, max_degree)
 	pickle.dump(train_data_set, open("train.p", "wb"))
 
+	print("Creating {} test data sets...".format(num_test_sets))
 	test_data_set = create_data(num_test_sets, max_degree)
 	pickle.dump(test_data_set, open("test.p", "wb"))
 

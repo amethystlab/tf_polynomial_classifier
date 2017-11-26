@@ -24,7 +24,6 @@ num_epochs = 1 # epoch = a repetition of data training; chosen arbitrarily
 
 tf.set_random_seed(57)
 
-
 x = tf.placeholder('float', [None, n_data_points]) # (0, n_data_points) as an ordered pair
 y = tf.placeholder('float', [None, n_output_layer])
 
@@ -108,15 +107,14 @@ def train_neural_network(x):
 				a = ii * batch_size
 				b = a + batch_size
 				blah = data_set[a:b]
-				#  INSERT DAN'S TRAINING SET HERE
+
 				epoch_x = np.asarray([np.hstack((g[0],g[1])).transpose() for g in blah])
 				epoch_y = np.asarray([make_position_v(g[2]).transpose() for g in blah])
 
 				_, c = sess.run([optimizer, cost], feed_dict = {x: epoch_x, y: epoch_y})
 				epoch_loss += c
-				print('{:1.8f}'.format(c))
+				print('Cost = {:1.8f}'.format(c))
 			print('Epoch {}, completed out of {}, with loss {}.'.format(epoch+1,num_epochs,epoch_loss))
-			#tells the user how well the data was trained
 
 		correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
 
@@ -127,18 +125,15 @@ def train_neural_network(x):
 		test_y = np.asarray([make_position_v(g[2]).transpose() for g in test_d])
 
 		print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
-		# INSERT DAN'S NON-TEST SET HERE
 
 		return predictor, sess
 
 with tf.Session() as sess:
 	machine, sess = train_neural_network(x)
-	#created a stored "machine" to train the nerual net consistantly
+	# created a stored "machine" to train the nerual net consistantly
 	saver = tf.train.Saver()
 	now = datetime.datetime.now()
 	base_filename = "polyclass_{}{}{}".format(now.year,now.month,now.day)
 	with open(base_filename + '_machine.pickle', 'wb') as file:
 		pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
 		saver.save(sess, base_filename + '.sess')
-
-		#use this machine to test other data sets in order to classify the class of a polynomial

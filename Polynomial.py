@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from Term import Term
@@ -15,7 +14,6 @@ class Polynomial:
 		self.num_coeffs = self.degree
 		self.coeffs = self.generate_coeffs(self.num_coeffs, self.degree)
 
-
 	# WHAT IS TO BE PRINTED TO SCREEN
 	def __str__(self):
 		string = ""
@@ -24,6 +22,7 @@ class Polynomial:
 		string += "Coeffs: {}\n".format(self.coeffs)
 		return string
 
+	# CREATES A STRING THAT IS COPY / PASTABLE TO MATLAB
 	def print_to_matlab(self):
 		pretty = ''
 		for c in self.coeffs:
@@ -47,6 +46,7 @@ class Polynomial:
 
 		return terms
 
+	# EVALUATES OUR POLYNOMIAL GIVING US f(x) VALUES
 	def evaluate(self, x):
 		f_x = np.zeros(len(x))
 		num_coeffs = len(self.coeffs)
@@ -58,7 +58,8 @@ class Polynomial:
 
 		return f_x
 
-	def graph(self, x = np.linspace(-1, 1, num=100) ):
+	# GRAPH THE POLYNOMIAL USING PYPLOT IN MATPLOTLIB
+	def graph(self, x = np.linspace(-1, 1, num=100)):
 		f_x = self.evaluate(x)
 
 		plt.plot(x,f_x)
@@ -76,4 +77,3 @@ if __name__ == '__main__':
 
 	# to run in interactive shell type
 	# exec(open("./Polynomial.py").read())
-	# then you can play with the class
