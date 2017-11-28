@@ -4,13 +4,6 @@ import numpy as np
 import pickle
 import sys
 
-def compute_values(max_degree):
-
-	poly = Polynomial(max_degree)
-	x = np.linspace(-1, 1, num=1000)
-
-	return (x, poly.evaluate(x), poly.degree)
-
 def create_data(num_data_sets, max_degree):
 
 	array_of_data_sets = np.ndarray((num_data_sets), dtype=np.object)
@@ -20,6 +13,15 @@ def create_data(num_data_sets, max_degree):
 
 	return array_of_data_sets
 
+def compute_values(max_degree):
+
+	poly = Polynomial(max_degree)
+	x = np.linspace(-1, 1, num=1000)
+
+	return (x, poly.evaluate(x), poly.degree)
+
+def seed(s = 5757):
+	return np.random.seed(s)
 
 if __name__ == '__main__':
 

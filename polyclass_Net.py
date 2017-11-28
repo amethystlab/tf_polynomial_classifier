@@ -2,6 +2,7 @@ import tensorflow as tf
 import datetime
 import pickle
 import numpy as np
+import Data_Creator as dc
 
 # Given: [xi, f(xi)]
 # Compute: d
@@ -11,14 +12,16 @@ meta_information = pickle.load(open("meta.p", "rb"))
 # dan, consider programmatically constructing the layers using something like this:
 # layer_sizes = [[800],[500,500],[400],[100]] # nodes for layer 3
 
-n_data_points = 1000 * 2
+n_data_points = 1000 * 2		# the 2 represents the x and the f(x)
 n_nodes_hl1 = 800 # nodes for layer 1
 n_nodes_hl2 = 500 # nodes for layer 2
 n_nodes_hl3 = 400 # nodes for layer 3
-n_list_data = meta_information['num_train']
+n_list_data = meta_information['num_train'] # 100000 currently
 n_output_layer = meta_information['max_degree']
 num_batches = 10
 batch_size = int(n_list_data/num_batches) # arbitrary choice that can be changed
+# batch_size is currently 10000
+# we want to make a next batch function that takes a batch size
 
 num_epochs = 1 # epoch = a repetition of data training; chosen arbitrarily
 
@@ -81,9 +84,7 @@ def make_position_v(q):
 
 def train_neural_network(x):
 	predictor = neural_network_model(x)
-	# print (type(predictor))
-	# print (predictor)
-	# print (y)
+
 	#(input_data * weights) + biases
 	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predictor, labels=y))
 	# minimize our cost
@@ -93,23 +94,26 @@ def train_neural_network(x):
 	optimizer = tf.train.AdamOptimizer().minimize(cost)
 	# the AdamOptimizer was chosen to optimize our data, but why?
 
-	data_set = pickle.load(open("train.p", "rb"))
-
-
+	# data_set = pickle.load(open("train.p", "rb"))
 
 	with tf.Session() as sess:
 		# begin tf session... we will need to keep this open in order to keep our "machine"
 		sess.run(tf.global_variables_initializer())
 
+		print('Testing {} pieces of data {} times for a total of {} pieces of data tested.'.format(
+						batch_size, num_batches, batch_size*num_batches))
+
 		for epoch in range(num_epochs):
 			epoch_loss = 0
-			for ii in range(num_batches):
-				a = ii * batch_size
-				b = a + batch_size
-				blah = data_set[a:b]
 
-				epoch_x = np.asarray([np.hstack((g[0],g[1])).transpose() for g in blah])
-				epoch_y = np.asarray([make_position_v(g[2]).transpose() for g in blah])
+			# resead random number generator here
+			dc.seed()
+			for ii in range(num_batches):
+
+				current_batch = dc.create_data(batch_size, meta_information['max_degree'])
+
+				epoch_x = np.asarray([np.hstack((item[0],item[1])).transpose() for item in current_batch])
+				epoch_y = np.asarray([make_position_v(item[2]).transpose() for item in current_batch])
 
 				_, c = sess.run([optimizer, cost], feed_dict = {x: epoch_x, y: epoch_y})
 				epoch_loss += c
@@ -130,6 +134,7 @@ def train_neural_network(x):
 
 with tf.Session() as sess:
 	machine, sess = train_neural_network(x)
+
 	# created a stored "machine" to train the nerual net consistantly
 	saver = tf.train.Saver()
 	now = datetime.datetime.now()
