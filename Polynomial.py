@@ -4,7 +4,6 @@ from Term import Term
 
 
 class Polynomial:
-
     # OBJECT CONSTRUCTOR
     def __init__(self, maxdegree=21):
         # degree of polynomial, any random number 1 - 20 (arbitrary choice)
