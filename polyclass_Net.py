@@ -7,7 +7,27 @@ import Data_Creator as dc
 # Given: [xi, f(xi)]
 # Compute: d
 
-meta_information = pickle.load(open("meta.p", "rb"))
+try:
+    # should not need to require this
+    meta_information = pickle.load(open("meta.p", "rb"))
+except:
+    print("No meta-information found")
+    print("Creating our own data")
+    print()
+    num_data_sets = 100000
+    num_test_sets = 1000
+
+    max_degree = 4
+
+    print("Creating {} training data sets...".format(num_data_sets))
+    train_data_set = dc.create_data(num_data_sets, max_degree)
+
+    print("Creating {} test data sets...".format(num_test_sets))
+    test_data_set = dc.create_data(num_test_sets, max_degree)
+
+    meta_information = {'num_test': num_test_sets,
+                        'num_train': num_data_sets, 'max_degree': max_degree}
+
 
 # dan, consider programmatically constructing the layers using something like this:
 # layer_sizes = [[800],[500,500],[400],[100]] # nodes for layer 3
@@ -87,14 +107,12 @@ def train_neural_network(x):
 
     #(input_data * weights) + biases
     cost = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(logits=predictor, labels=y))
+        tf.nn.softmax_cross_entropy_with_logits_v2(logits=predictor, labels=y))
     # minimize our cost
     # softmax: used for multi-class classification
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
     # the AdamOptimizer was chosen to optimize our data, but why?
-
-    # data_set = pickle.load(open("train.p", "rb"))
 
     with tf.Session() as sess:
         # begin tf session... we will need to keep this open in order to keep
