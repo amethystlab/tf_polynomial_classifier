@@ -2,11 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Term import Term
 
-
 class Polynomial:
     # OBJECT CONSTRUCTOR
     def __init__(self, maxdegree=21):
-        # degree of polynomial, any random number 1 - 20 (arbitrary choice)
+        # degree of polynomial, any random number 1 - 20 
         self.degree = np.random.randint(1, maxdegree)
 
         # number of coefficients in polynomial,
@@ -49,8 +48,7 @@ class Polynomial:
     # EVALUATES OUR POLYNOMIAL GIVING US f(x) VALUES
     def evaluate(self, x):
         f_x = np.zeros(len(x))
-        num_coeffs = len(self.coeffs)
-
+        
         for p in self.coeffs:
             coeff = p.coeff
             exponent = p.exponent
@@ -73,7 +71,7 @@ class Polynomial:
 if __name__ == '__main__':
     poly = Polynomial()
     print(poly)
-    poly.graph()
+    # poly.graph()
 
     # to run in interactive shell type
     # exec(open("./Polynomial.py").read())

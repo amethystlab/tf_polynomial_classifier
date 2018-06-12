@@ -3,9 +3,11 @@ import datetime
 import pickle
 import numpy as np
 import Data_Creator as dc
+from Polynomial import Polynomial
+
 
 # Given: [xi, f(xi)]
-# Compute: d
+# Compute: d 
 
 try:
     # should not need to require this
@@ -78,31 +80,34 @@ def neural_network_model(data):
     # continuous but not everywhere differentiable functions
     # returns a Tensor
 
-    l1 = tf.add(tf.matmul(data, hidden_1_layer[
-                'weights']), hidden_1_layer['biases'])
+    l1 = tf.add(tf.matmul(data, hidden_1_layer['weights']), hidden_1_layer['biases'])
     l1 = tf.nn.relu(l1, 'layer1')
 
-    l2 = tf.add(tf.matmul(l1, hidden_2_layer[
-                'weights']), hidden_2_layer['biases'])
+    l2 = tf.add(tf.matmul(l1, hidden_2_layer['weights']), hidden_2_layer['biases'])
     l2 = tf.nn.relu(l2, 'layer2')
 
-    l3 = tf.add(tf.matmul(l2, hidden_3_layer[
-                'weights']), hidden_3_layer['biases'])
+    l3 = tf.add(tf.matmul(l2, hidden_3_layer['weights']), hidden_3_layer['biases'])
     l3 = tf.nn.relu(l3, 'layer3')
 
     output = tf.matmul(l3, output_layer['weights']) + output_layer['biases']
     #(multiplies layer 3 with the weight of the output layer) + the output layer biases
 
     return output
+#####
 
 
+
+## wtf is this method for???
+
+
+#####
 def make_position_v(q):
     z = np.zeros(n_output_layer)
     z[q] = 1
     return z
 
 
-def train_neural_network(x):
+def train_neural_network(x, xs, ys, degree):
     predictor = neural_network_model(x)
 
     #(input_data * weights) + biases
@@ -128,7 +133,7 @@ def train_neural_network(x):
             # resead random number generator here
             dc.seed()
 
-            for ii in range(num_batches):
+            for _ in range(num_batches):
 
                 current_batch = dc.create_data(
                     batch_size, meta_information['max_degree'])
@@ -157,15 +162,46 @@ def train_neural_network(x):
 
         print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
 
+        ### test our testing_polynomial that we create
+
+        correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
+
+        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+
+        test_x = np.asarray([np.hstack((xs, ys))])
+        test_y = np.asarray([make_position_v(degree)])
+
+        print(test_x)
+        print(test_y)
+
+        # it doesn't like that we arent giving it 2000 data points....
+        # it seems like we need to feed it a whole testing set and not
+        # just a single polynomial....
+       # print('Accuracy for testing polynomial:', accuracy.eval({x: xs, y: ys}))
+
+
         return predictor, sess
 
 with tf.Session() as sess:
-    machine, sess = train_neural_network(x)
+    testing_polynomial = Polynomial(3)
+    print(testing_polynomial)
+    xs = np.linspace(-1, 1, num=1000)
+    ys = testing_polynomial.evaluate(xs)
+    degree = testing_polynomial.degree
+    print('xs: {}'.format(xs))
+    print('ys: {}'.format(ys))
+    print('degree: {}'.format(degree))
+    machine, sess = train_neural_network(x, xs, ys, degree)
 
-    # created a stored "machine" to train the nerual net consistantly
-    saver = tf.train.Saver()
-    now = datetime.datetime.now()
-    base_filename = "polyclass_{}{}{}".format(now.year, now.month, now.day)
-    with open(base_filename + '_machine.pickle', 'wb') as file:
-        pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
-        saver.save(sess, base_filename + '.sess')
+    
+
+    ## currently unable to save the model, something to work on later
+
+    # # created a stored "machine" to train the nerual net consistantly
+    # saver = tf.train.Saver()
+    # # saved_model = tf.saved_model.simple_save(sess,)
+    # now = datetime.datetime.now()
+    # base_filename = "polyclass_{}{}{}".format(now.year, now.month, now.day)
+    # with open(base_filename + '_machine.pickle', 'wb') as file:
+    #     pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
+    #     saver.save(sess, base_filename + '.sess')

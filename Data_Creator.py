@@ -31,7 +31,7 @@ if __name__ == '__main__':
     num_data_sets = 100000
     num_test_sets = 1000
 
-    max_degree = 4
+    max_degree = 3
 
     if len(sys.argv) > 1:
         num_data_sets = int(sys.argv[1])
@@ -42,6 +42,7 @@ if __name__ == '__main__':
 
     print("Creating {} test data sets...".format(num_test_sets))
     test_data_set = create_data(num_test_sets, max_degree)
+    print(test_data_set[0])
     pickle.dump(test_data_set, open("test.p", "wb"))
 
     meta_information = {'num_test': num_test_sets,
