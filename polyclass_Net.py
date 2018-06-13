@@ -5,6 +5,7 @@ import numpy as np
 import Data_Creator as dc
 from Polynomial import Polynomial
 
+import pdb
 
 # Given: [xi, f(xi)]
 # Compute: d 
@@ -46,7 +47,7 @@ batch_size = int(n_list_data/num_batches)
 # batch_size is currently 10000
 # we want to make a next batch function that takes a batch size
 
-num_epochs = 1  # epoch = a repetition of data training; chosen arbitrarily
+num_epochs = 5  # epoch = a repetition of data training; chosen arbitrarily
 
 tf.set_random_seed(57)
 
@@ -107,101 +108,109 @@ def make_position_v(q):
     return z
 
 
-def train_neural_network(x, xs, ys, degree):
+def train_neural_network(x, sess):
     predictor = neural_network_model(x)
 
     #(input_data * weights) + biases
-    cost = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits_v2(logits=predictor, labels=y))
+    asdf = tf.nn.softmax_cross_entropy_with_logits_v2(logits=predictor, labels=y)
+    cost = tf.reduce_mean(asdf)
+
+    degree_predictor = tf.argmax(tf.nn.softmax(predictor),1)
     # minimize our cost
     # softmax: used for multi-class classification
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
     # the AdamOptimizer was chosen to optimize our data, but why?
 
-    with tf.Session() as sess:
-        # begin tf session... we will need to keep this open in order to keep
-        # our "machine"
-        sess.run(tf.global_variables_initializer())
+    # begin tf session... we will need to keep this open in order to keep
+    # our "machine"
+    sess.run(tf.global_variables_initializer())
 
-        print('Testing {} pieces of data {} times for a total of {} pieces of data tested.'.format(
-            batch_size, num_batches, batch_size*num_batches))
+    print('Testing {} pieces of data {} times for a total of {} pieces of data tested.'.format(
+        batch_size, num_batches, batch_size*num_batches))
 
-        for epoch in range(num_epochs):
-            epoch_loss = 0
+    for epoch in range(num_epochs):
+        epoch_loss = 0
 
-            # resead random number generator here
-            dc.seed()
+        # resead random number generator here
+        dc.seed()
 
-            for _ in range(num_batches):
+        for _ in range(num_batches):
 
-                current_batch = dc.create_data(
-                    batch_size, meta_information['max_degree'])
+            current_batch = dc.create_data(
+                batch_size, meta_information['max_degree'])
 
-                epoch_x = np.asarray(
-                    [np.hstack((item[0], item[1])).transpose() for item in current_batch])
-                epoch_y = np.asarray(
-                    [make_position_v(item[2]).transpose() for item in current_batch])
+            epoch_x = np.asarray(
+                [np.hstack((item[0], item[1])).transpose() for item in current_batch])
+            epoch_y = np.asarray(
+                [make_position_v(item[2]).transpose() for item in current_batch])
 
-                _, c = sess.run([optimizer, cost], feed_dict={
-                                x: epoch_x, y: epoch_y})
-                epoch_loss += c
-                print('Cost = {:1.8f}'.format(c))
-            print('Epoch {}, completed out of {}, with loss {}.'.format(
-                epoch+1, num_epochs, epoch_loss))
+            _, c = sess.run([optimizer, cost], feed_dict={
+                            x: epoch_x, y: epoch_y})
+            epoch_loss += c
+            print('Cost = {:1.8f}'.format(c))
+        print('Epoch {}, completed out of {}, with loss {}.'.format(
+            epoch+1, num_epochs, epoch_loss))
 
-        correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
+    correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
 
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+    accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
-        test_d = pickle.load(open("test.p", "rb"))
-        test_x = np.asarray([np.hstack((g[0], g[1])).transpose()
-                             for g in test_d])
-        test_y = np.asarray([make_position_v(g[2]).transpose()
-                             for g in test_d])
+    test_d = pickle.load(open("test.p", "rb"))
+    test_x = np.asarray([np.hstack((g[0], g[1])).transpose()
+                            for g in test_d])
+    test_y = np.asarray([make_position_v(g[2]).transpose()
+                            for g in test_d])
 
-        print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
+    print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
 
-        ### test our testing_polynomial that we create
+    ### test our testing_polynomial that we create
 
-        correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
+    correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
 
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-
-        test_x = np.asarray([np.hstack((xs, ys))])
-        test_y = np.asarray([make_position_v(degree)])
-
-        print(test_x)
-        print(test_y)
-
-        # it doesn't like that we arent giving it 2000 data points....
-        # it seems like we need to feed it a whole testing set and not
-        # just a single polynomial....
-       # print('Accuracy for testing polynomial:', accuracy.eval({x: xs, y: ys}))
-
-
-        return predictor, sess
-
-with tf.Session() as sess:
-    testing_polynomial = Polynomial(3)
-    print(testing_polynomial)
-    xs = np.linspace(-1, 1, num=1000)
-    ys = testing_polynomial.evaluate(xs)
-    degree = testing_polynomial.degree
-    print('xs: {}'.format(xs))
-    print('ys: {}'.format(ys))
-    print('degree: {}'.format(degree))
-    machine, sess = train_neural_network(x, xs, ys, degree)
+    accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
     
+    acc = accuracy.eval({x: test_x, y: test_y})
 
-    ## currently unable to save the model, something to work on later
+    print('Accuracy for testing polynomial:', acc)
 
-    # # created a stored "machine" to train the nerual net consistantly
-    # saver = tf.train.Saver()
-    # # saved_model = tf.saved_model.simple_save(sess,)
-    # now = datetime.datetime.now()
-    # base_filename = "polyclass_{}{}{}".format(now.year, now.month, now.day)
-    # with open(base_filename + '_machine.pickle', 'wb') as file:
-    #     pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
-    #     saver.save(sess, base_filename + '.sess')
+
+    return degree_predictor, predictor, sess
+
+
+def use_model(degree_predictor, space_vals, func_vals, degree, sess):
+
+    test_x = np.asarray([np.hstack((space_vals, func_vals))])
+    result = sess.run(degree_predictor, feed_dict={x: test_x})
+
+    # print('the estimated degree of the test poly is {}'.format(result[0]))
+    return result[0]
+
+with tf.Session() as sess:
+
+
+    degree_predictor, machine, sess = train_neural_network(x, sess)
+
+
+        
+    for ii in range(10):
+        testing_polynomial = Polynomial(10)
+        print(testing_polynomial)
+        space_vals = np.linspace(-1, 1, num=1000)
+        func_vals = testing_polynomial.evaluate(space_vals)
+        degree = testing_polynomial.degree
+
+        result = use_model(degree_predictor, space_vals, func_vals, degree, sess)
+        print('true degree: {}, estimated_degree: {}'.format(degree, result))
+
+        ## currently unable to save the model, something to work on later
+
+        # # created a stored "machine" to train the nerual net consistantly
+        # saver = tf.train.Saver()
+        # # saved_model = tf.saved_model.simple_save(sess,)
+        # now = datetime.datetime.now()
+        # base_filename = "polyclass_{}{}{}".format(now.year, now.month, now.day)
+        # with open(base_filename + '_machine.pickle', 'wb') as file:
+        #     pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
+        #     saver.save(sess, base_filename + '.sess')

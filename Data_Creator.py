@@ -18,8 +18,17 @@ def create_data(num_data_sets, max_degree):
 def compute_values(max_degree):
 
     poly = Polynomial(max_degree)
-    x = np.linspace(-1, 1, num=1000)
+    a = np.random.uniform(-10,10)
+    b = np.random.uniform(-10,10)
 
+    if b<a:
+        c = a
+        a = b
+        b = c
+
+    # x = np.random.uniform(a, b+1, 1000)
+    x = np.random.uniform(-1, 1, 1000)
+    x.sort()
     return (x, poly.evaluate(x), poly.degree)
 
 
@@ -31,7 +40,7 @@ if __name__ == '__main__':
     num_data_sets = 100000
     num_test_sets = 1000
 
-    max_degree = 3
+    max_degree = 10
 
     if len(sys.argv) > 1:
         num_data_sets = int(sys.argv[1])
@@ -42,7 +51,6 @@ if __name__ == '__main__':
 
     print("Creating {} test data sets...".format(num_test_sets))
     test_data_set = create_data(num_test_sets, max_degree)
-    print(test_data_set[0])
     pickle.dump(test_data_set, open("test.p", "wb"))
 
     meta_information = {'num_test': num_test_sets,
