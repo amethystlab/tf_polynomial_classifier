@@ -2,6 +2,11 @@
 *.p
 *.pickle
 *.png
+*.meta
+*.index
+*.model
+checkpoint
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
