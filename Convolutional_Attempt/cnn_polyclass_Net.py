@@ -9,9 +9,9 @@ from tflearn.layers.estimator import regression
 
 
 
-LR = 1e-3
+LEARNING_RATE = 1e-3
 META_INFORMATION = pickle.load(open("meta.p", "rb"))
-MODEL_NAME = 'degree_classifier-{}-{}.model'.format(LR, '6conv-basic')
+MODEL_NAME = 'degree_classifier-{}-{}.model'.format(LEARNING_RATE, '6conv-basic')
 N_DATA_POINTS = 500 * 2		# the 2 represents the x and the f(x)
 N_OUTPUT_LAYER = META_INFORMATION['max_degree']
 
@@ -49,7 +49,7 @@ def neural_network_model():
     convnet = dropout(convnet, 0.8)
 
     convnet = fully_connected(convnet, N_OUTPUT_LAYER, activation='softmax')
-    convnet = regression(convnet, optimizer='adam', learning_rate=LR,
+    convnet = regression(convnet, optimizer='adam', learning_rate=LEARNING_RATE,
                          loss='categorical_crossentropy', name='targets')
 
     model = tflearn.DNN(convnet, tensorboard_dir='log')
