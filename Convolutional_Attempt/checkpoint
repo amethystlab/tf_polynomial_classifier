@@ -1,2 +1,0 @@
-model_checkpoint_path: "/Users/dan/Dropbox/UWEC_Machine_Learning_Research/Fall_2017/tf_polynomial_classifier/Convolutional_Attempt/degree_classifier-0.001-6conv-basic.model"
-all_model_checkpoint_paths: "/Users/dan/Dropbox/UWEC_Machine_Learning_Research/Fall_2017/tf_polynomial_classifier/Convolutional_Attempt/degree_classifier-0.001-6conv-basic.model"
