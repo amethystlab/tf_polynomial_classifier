@@ -1,14 +1,10 @@
 import tensorflow as tf
+import tflearn
 import datetime
 import pickle
 import numpy as np
 import Data_Creator as dc
 from Polynomial import Polynomial
-
-import pdb
-
-# Given: [xi, f(xi)]
-# Compute: d 
 
 try:
     # should not need to require this
@@ -47,13 +43,16 @@ batch_size = int(n_list_data/num_batches)
 # batch_size is currently 10000
 # we want to make a next batch function that takes a batch size
 
-num_epochs = 5  # epoch = a repetition of data training; chosen arbitrarily
+num_epochs = 1  # epoch = a repetition of data training
 
 tf.set_random_seed(57)
 
 # (0, n_data_points) as an ordered pair
 x = tf.placeholder('float', [None, n_data_points])
 y = tf.placeholder('float', [None, n_output_layer])
+
+
+
 
 
 def neural_network_model(data):
@@ -94,24 +93,17 @@ def neural_network_model(data):
     #(multiplies layer 3 with the weight of the output layer) + the output layer biases
 
     return output
-#####
 
-
-
-## wtf is this method for???
-
-
-#####
 def make_position_v(q):
     z = np.zeros(n_output_layer)
     z[q] = 1
     return z
 
 
-def train_neural_network(x, sess):
-    predictor = neural_network_model(x)
+def train_neural_network(x, sess, predictor):
 
     #(input_data * weights) + biases
+    # TODO change asdf
     asdf = tf.nn.softmax_cross_entropy_with_logits_v2(logits=predictor, labels=y)
     cost = tf.reduce_mean(asdf)
 
@@ -163,17 +155,7 @@ def train_neural_network(x, sess):
                             for g in test_d])
 
     print('Accuracy:', accuracy.eval({x: test_x, y: test_y}))
-
-    ### test our testing_polynomial that we create
-
-    correct = tf.equal(tf.argmax(predictor, 1), tf.argmax(y, 1))
-
-    accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-
-    
-    acc = accuracy.eval({x: test_x, y: test_y})
-
-    print('Accuracy for testing polynomial:', acc)
+    print()
 
 
     return degree_predictor, predictor, sess
@@ -187,30 +169,37 @@ def use_model(degree_predictor, space_vals, func_vals, degree, sess):
     # print('the estimated degree of the test poly is {}'.format(result[0]))
     return result[0]
 
-with tf.Session() as sess:
+## TODO put this stuff in its own file
+## TODO save the model to a variable and load it
+
+# https://www.tensorflow.org/programmers_guide/saved_model
+
+if __name__ == '__main__':
 
 
-    degree_predictor, machine, sess = train_neural_network(x, sess)
+    with tf.Session() as sess:
 
+        # file_object = open('machine.pickle', 'wb')
 
+        predictor = neural_network_model(x)
         
-    for ii in range(10):
-        testing_polynomial = Polynomial(10)
-        print(testing_polynomial)
-        space_vals = np.linspace(-1, 1, num=1000)
-        func_vals = testing_polynomial.evaluate(space_vals)
-        degree = testing_polynomial.degree
 
-        result = use_model(degree_predictor, space_vals, func_vals, degree, sess)
-        print('true degree: {}, estimated_degree: {}'.format(degree, result))
+        # degree_predictor, machine, sess = train_neural_network(x, sess, predictor)
+        predictor, machine, sess = train_neural_network(x, sess, predictor)
+        # dill.dump(predictor, file_object)
+        saver = tf.train.Saver()
+        save_path = saver.save(sess, "/tmp/model.ckpt")
+        print("Model saved in path: %s" % save_path)
 
-        ## currently unable to save the model, something to work on later
 
-        # # created a stored "machine" to train the nerual net consistantly
-        # saver = tf.train.Saver()
-        # # saved_model = tf.saved_model.simple_save(sess,)
-        # now = datetime.datetime.now()
-        # base_filename = "polyclass_{}{}{}".format(now.year, now.month, now.day)
-        # with open(base_filename + '_machine.pickle', 'wb') as file:
-        #     pickle.dump(machine, file, protocol=pickle.HIGHEST_PROTOCOL)
-        #     saver.save(sess, base_filename + '.sess')
+            
+        # for ii in range(10):
+        #     testing_polynomial = Polynomial(10)
+        #     print(testing_polynomial)
+        #     space_vals = np.linspace(-1, 1, num=1000)
+        #     func_vals = testing_polynomial.evaluate(space_vals)
+        #     degree = testing_polynomial.degree
+
+        #     result = use_model(degree_predictor, space_vals, func_vals, degree, sess)
+        #     print('true degree: {}, estimated_degree: {}'.format(degree, result))
+        #     print()
