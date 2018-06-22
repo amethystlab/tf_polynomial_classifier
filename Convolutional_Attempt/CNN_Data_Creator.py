@@ -1,10 +1,16 @@
-from Polynomial import Polynomial
-
-import numpy as np
 import pickle
 import sys
 
+import numpy as np
 
+from Polynomial import Polynomial
+
+
+
+''' Creates our data
+
+creates and returns an array of data sets
+'''
 def create_data(num_data_sets, max_degree):
 
     array_of_data_sets = np.ndarray((num_data_sets), dtype=np.object)
@@ -15,6 +21,12 @@ def create_data(num_data_sets, max_degree):
     return array_of_data_sets
 
 
+
+''' Computes f(x) values
+
+computes the f(x) values for a given function
+on a specified range of x values
+'''
 def compute_values(max_degree):
 
     poly = Polynomial(max_degree)
@@ -26,15 +38,12 @@ def compute_values(max_degree):
         a = b
         b = c
 
-    # x = np.random.uniform(a, b+1, 1000)
     x = np.random.uniform(-1, 1, 500)
     x.sort()
     fx = poly.evaluate(x)
     return (np.append(x,fx), poly.degree)
 
 
-def seed(s=5757):
-    return np.random.seed(s)
 
 if __name__ == '__main__':
 
