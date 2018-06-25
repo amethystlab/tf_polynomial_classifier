@@ -193,13 +193,13 @@ if __name__ == '__main__':
 
 
             
-        # for ii in range(10):
-        #     testing_polynomial = Polynomial(10)
-        #     print(testing_polynomial)
-        #     space_vals = np.linspace(-1, 1, num=1000)
-        #     func_vals = testing_polynomial.evaluate(space_vals)
-        #     degree = testing_polynomial.degree
+        for ii in range(10):
+            testing_polynomial = Polynomial(10)
+            print(testing_polynomial)
+            space_vals = np.linspace(-1, 1, num=1000)
+            func_vals = testing_polynomial.evaluate(space_vals)
+            degree = testing_polynomial.degree
 
-        #     result = use_model(degree_predictor, space_vals, func_vals, degree, sess)
-        #     print('true degree: {}, estimated_degree: {}'.format(degree, result))
-        #     print()
+            result = use_model(degree_predictor, space_vals, func_vals, degree, sess)
+            print('true degree: {}, estimated_degree: {}'.format(degree, result))
+            print()

@@ -71,6 +71,7 @@ Uses methods in tflearn to train our network then
 saves the network to disk
 '''
 def train_convolutional_network(model):
+    HM_EPOCHS = 500
 
     train_data_set = pickle.load(open("train.p", "rb"))
     train_data = train_data_set
@@ -92,9 +93,9 @@ def train_convolutional_network(model):
     test_x = np.array([i[0] for i in test]).reshape(-1, N_DATA_POINTS, 1)
     test_y = np.array([turn_degree_into_one_hot(i[1]) for i in test])
 
-    model.fit({'input': X}, {'targets': Y}, n_epoch=50, validation_set=({'input': test_x},
+    model.fit({'input': X}, {'targets': Y}, n_epoch=HM_EPOCHS, validation_set=({'input': test_x},
             {'targets': test_y}), snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
-
+    
     model.save(MODEL_NAME)
 
 
