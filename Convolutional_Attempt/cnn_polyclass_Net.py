@@ -8,11 +8,13 @@ from tflearn.layers.conv import conv_1d, max_pool_1d
 from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.estimator import regression
 
+from Polynomial import Polynomial
+
 
 
 LEARNING_RATE = 1e-3
 META_INFORMATION = pickle.load(open("meta.p", "rb"))
-MODEL_NAME = 'degree_classifier-{}-{}.model'.format(LEARNING_RATE, '6conv-basic')
+MODEL_NAME = 'degree_classifier-{}-{}.model'.format(LEARNING_RATE, '6conv-basic_rev1')
 N_DATA_POINTS = 500 * 2		# the 2 represents the x and the f(x)
 N_OUTPUT_LAYER = META_INFORMATION['max_degree']
 
@@ -28,10 +30,7 @@ def neural_network_model():
 
     convnet = input_data(shape=[None, N_DATA_POINTS, 1], name='input')
 
-    convnet = conv_1d(convnet, 32, 2, activation='relu')
-    convnet = max_pool_1d(convnet, 2)
-
-    convnet = conv_1d(convnet, 64, 2, activation='relu')
+    convnet = conv_1d(convnet, 16, 2, activation='relu')
     convnet = max_pool_1d(convnet, 2)
 
     convnet = conv_1d(convnet, 32, 2, activation='relu')
@@ -40,10 +39,13 @@ def neural_network_model():
     convnet = conv_1d(convnet, 64, 2, activation='relu')
     convnet = max_pool_1d(convnet, 2)
 
-    convnet = conv_1d(convnet, 32, 2, activation='relu')
+    convnet = conv_1d(convnet, 128, 2, activation='relu')
     convnet = max_pool_1d(convnet, 2)
 
-    convnet = conv_1d(convnet, 64, 2, activation='relu')
+    convnet = conv_1d(convnet, 256, 2, activation='relu')
+    convnet = max_pool_1d(convnet, 2)
+
+    convnet = conv_1d(convnet, 512, 2, activation='relu')
     convnet = max_pool_1d(convnet, 2)
 
     convnet = fully_connected(convnet, 1024, activation='relu')
@@ -90,7 +92,7 @@ def train_convolutional_network(model):
     test_x = np.array([i[0] for i in test]).reshape(-1, N_DATA_POINTS, 1)
     test_y = np.array([turn_degree_into_one_hot(i[1]) for i in test])
 
-    model.fit({'input': X}, {'targets': Y}, n_epoch=5, validation_set=({'input': test_x},
+    model.fit({'input': X}, {'targets': Y}, n_epoch=50, validation_set=({'input': test_x},
             {'targets': test_y}), snapshot_step=500, show_metric=True, run_id=MODEL_NAME)
 
     model.save(MODEL_NAME)
@@ -110,9 +112,42 @@ def turn_degree_into_one_hot(q):
 
 
 
+''' Shows the model in action
+
+Creates sample polynomials and uses our model to predict 
+their degree. Shows the expected degree and the predicted 
+degree
+'''
+def use_network(model):
+    poly = Polynomial(META_INFORMATION['max_degree'])
+    print(poly)
+    space_vals = np.linspace(-1, 1, num=500)
+    func_vals = poly.evaluate(space_vals)
+    degree = poly.degree
+
+    '''
+    we choose to reshape it here because our model will not
+    accept it in its natural state
+    '''
+    test_x = np.asarray([np.hstack((space_vals, func_vals))]).reshape(1000,1)
+
+    '''
+    result is a one hot array of size 'max_degree'
+    The array tells us how likely each of the possible 
+    degrees are, we then print out the degree with the highest
+    percentage
+    '''
+    result  = model.predict([test_x])
+    print('true degree: {}, estimated_degree: {}'.format(degree, np.argmax(result)))
+    print()
+
+
 
 if __name__ == '__main__':
 
     model = neural_network_model()
     train_convolutional_network(model)
+    
+    for ii in range(10):
+        use_network(model)
 
